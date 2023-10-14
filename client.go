@@ -97,7 +97,7 @@ func (c *Client) Info() (*InfoResponse, error) {
 
 // Embed
 // Embed a string using the embedding server
-func (c *Client) Embed(inputs string) (EmbedResponse, error) {
+func (c *Client) Embed(inputs string, truncate bool) (EmbedResponse, error) {
 	// ensure inputs is not empty
 	if inputs == "" {
 		return nil, ErrEmptyInputs
@@ -105,7 +105,8 @@ func (c *Client) Embed(inputs string) (EmbedResponse, error) {
 
 	// create the request
 	req, err := json.Marshal(EmbedRequest{
-		Inputs: inputs,
+		Inputs:   inputs,
+		Truncate: truncate,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal request: %w", err)

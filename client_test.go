@@ -17,7 +17,7 @@ func TestClient(t *testing.T) {
 	}
 	c := tei.NewClient(host, nil, nil, time.Second)
 
-	emb, err := c.Embed("Hello world!")
+	emb, err := c.Embed("Hello world!", false)
 	assert.NoError(t, err)
 	assert.NotNil(t, emb)
 	assert.Equal(t, 1, len(emb))

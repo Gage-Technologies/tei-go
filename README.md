@@ -33,7 +33,7 @@ import "github.com/gage-technologies/tei-go/tei"
 
 func main() {
 	client := tei.NewClient("http://localhost:8080", nil, nil, time.Second*30)
-	res, err := client.Embed("Hi there!")
+	res, err := client.Embed("Hi there!", false)
 	if err != nil {
 		panic(err)
 	}
