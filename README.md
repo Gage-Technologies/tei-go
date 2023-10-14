@@ -21,7 +21,7 @@ This client library is designed for Go developers who want to interact with the 
 To install the package, you can run:
 
 ```
-go get github.com/Gage-Technologies/tei-go
+go get github.com/gage-technologies/tei-go
 ```
 
 ## Usage
@@ -29,7 +29,7 @@ go get github.com/Gage-Technologies/tei-go
 Here's a simple example to demonstrate how to use this library:
 
 ```go
-import "github.com/Gage-Technologies/tei-go/tei"
+import "github.com/gage-technologies/tei-go/tei"
 
 func main() {
 	client := tei.NewClient("http://localhost:8080", nil, nil, time.Second*30)
