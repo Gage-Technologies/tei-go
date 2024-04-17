@@ -31,10 +31,11 @@ type InfoResponse struct {
 type ErrorType string
 
 const (
-	ErrorTypeValidation = "validation"
-	ErrorTypeTokenizer  = "tokenizer"
-	ErrorTypeBackend    = "backend"
-	ErrorTypeOverloaded = "overloaded"
+	ErrorTypeValidation ErrorType = "validation"
+	ErrorTypeTokenizer  ErrorType = "tokenizer"
+	ErrorTypeBackend    ErrorType = "backend"
+	ErrorTypeOverloaded ErrorType = "overloaded"
+	ErrorTypeUnhealthy  ErrorType = "unhealthy"
 )
 
 // EmbedError
@@ -43,3 +44,121 @@ type EmbedError struct {
 	Error     string    `json:"error"`
 	ErrorType ErrorType `json:"error_type"`
 }
+
+// PredictRequest
+// Represents a request to the predict endpoint
+type PredictRequest struct {
+	Inputs interface{} `json:"inputs"`
+}
+
+// Prediction
+// Represents a single prediction response with a score and label
+type Prediction struct {
+	Label string  `json:"label"`
+	Score float32 `json:"score"`
+}
+
+// PredictResponse
+// Can be a list of predictions or a list of list of predictions depending on the input
+type PredictResponse []interface{}
+
+// RerankRequest
+// Represents a request to the rerank endpoint with a query and list of texts
+type RerankRequest struct {
+	Query string   `json:"query"`
+	Texts []string `json:"texts"`
+}
+
+// Rank
+// Represents a ranked response for reranking functionality
+type Rank struct {
+	Index int     `json:"index"`
+	Score float32 `json:"score"`
+	Text  string  `json:"text,omitempty"` // optional field
+}
+
+// RerankResponse
+// Represents a response from the rerank endpoint
+type RerankResponse []Rank
+
+// VertexRequest
+// Represents a request to process various embedding or prediction tasks
+type VertexRequest struct {
+	Instances []VertexInstance `json:"instances"`
+}
+
+// VertexInstance
+// Represents an instance of a task to be processed, can be embeddings, predictions, etc.
+type VertexInstance struct {
+	Type  string      `json:"type"`
+	Input interface{} `json:"input"`
+	// Additional properties based on specific requirements
+}
+
+// VertexResponseInstance
+// Represents the response for each task processed by the vertex endpoint
+type VertexResponseInstance struct {
+	Type   string      `json:"type"`
+	Result interface{} `json:"result"`
+}
+
+// TokenizeRequest
+// Represents a request to the tokenize endpoint
+type TokenizeRequest struct {
+	Inputs           interface{} `json:"inputs"` // Can be a single string or an array of strings
+	AddSpecialTokens bool        `json:"add_special_tokens"`
+}
+
+// SimpleToken
+// Represents a single tokenized output
+type SimpleToken struct {
+	ID      int    `json:"id"`
+	Text    string `json:"text"`
+	Special bool   `json:"special"`
+	Start   int    `json:"start"`
+	Stop    int    `json:"stop"`
+}
+
+// TokenizeResponse
+// Represents a response from the tokenize endpoint
+type TokenizeResponse [][]SimpleToken
+
+// DecodeRequest
+// Represents a request to the decode endpoint
+type DecodeRequest struct {
+	Ids               interface{} `json:"ids"` // Can be a single array of integers or a nested array
+	SkipSpecialTokens bool        `json:"skip_special_tokens"`
+}
+
+// DecodeResponse
+// Represents a response from the decode endpoint, which is an array of strings
+type DecodeResponse []string
+
+// EmbedSparseRequest
+// Represents a request to the embed_sparse endpoint
+type EmbedSparseRequest struct {
+	Inputs   interface{} `json:"inputs"` // Can be a single string or an array of strings
+	Truncate bool        `json:"truncate"`
+}
+
+// SparseValue
+// Represents a single sparse embedding output
+type SparseValue struct {
+	Index int     `json:"index"`
+	Value float32 `json:"value"`
+}
+
+// EmbedSparseResponse
+// Represents a response from the embed_sparse endpoint
+type EmbedSparseResponse [][]SparseValue
+
+// EmbedAllRequest
+// Represents a request to the embed_all endpoint
+type EmbedAllRequest struct {
+	Inputs   interface{} `json:"inputs"` // Can be a single string or an array of strings
+	Truncate bool        `json:"truncate"`
+}
+
+// EmbedAllResponse
+// Represents a response from the embed_all endpoint, which is a nested array of floats
+type EmbedAllResponse [][][]float32
