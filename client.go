@@ -194,7 +194,7 @@ func (c *Client) Embed(inputs string, truncate bool) (EmbedResponse, error) {
 
 // EmbedAll
 // Retrieve embeddings for all input tokens without pooling
-func (c *Client) EmbedAll(inputs string, truncate bool) ([][][]float32, error) {
+func (c *Client) EmbedAll(inputs []string, truncate bool) ([][][]float32, error) {
 	req, err := json.Marshal(EmbedAllRequest{
 		Inputs:   inputs,
 		Truncate: truncate,
@@ -230,7 +230,7 @@ func (c *Client) EmbedAll(inputs string, truncate bool) ([][][]float32, error) {
 
 // EmbedSparse
 // Retrieve sparse embeddings using SPLADE pooling if supported by the model
-func (c *Client) EmbedSparse(inputs string, truncate bool) ([][]SparseValue, error) {
+func (c *Client) EmbedSparse(inputs []string, truncate bool) ([][]SparseValue, error) {
 	req, err := json.Marshal(EmbedSparseRequest{
 		Inputs:   inputs,
 		Truncate: truncate,
@@ -266,7 +266,7 @@ func (c *Client) EmbedSparse(inputs string, truncate bool) ([][]SparseValue, err
 
 // Predict
 // Make predictions using the provided inputs
-func (c *Client) Predict(inputs interface{}) (PredictResponse, error) {
+func (c *Client) Predict(inputs string) ([]Prediction, error) {
 	req, err := json.Marshal(PredictRequest{
 		Inputs: inputs,
 	})
@@ -290,7 +290,7 @@ func (c *Client) Predict(inputs interface{}) (PredictResponse, error) {
 		return nil, c.handleErrorResponse(res)
 	}
 
-	var response PredictResponse
+	var response []Prediction
 	err = json.NewDecoder(res.Body).Decode(&response)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse response: %w", err)
@@ -301,7 +301,7 @@ func (c *Client) Predict(inputs interface{}) (PredictResponse, error) {
 
 // Rerank
 // Rerank a list of texts based on a query
-func (c *Client) Rerank(query string, texts []string) (RerankResponse, error) {
+func (c *Client) Rerank(query string, texts []string) ([]Rank, error) {
 	req, err := json.Marshal(RerankRequest{
 		Query: query,
 		Texts: texts,
@@ -326,45 +326,14 @@ func (c *Client) Rerank(query string, texts []string) (RerankResponse, error) {
 		return nil, c.handleErrorResponse(res)
 	}
 
-	var response RerankResponse
+	var response []Rank
 	err = json.NewDecoder(res.Body).Decode(&response)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse response: %w", err)
 	}
 
-	return response, nil
-}
-
-// Vertex
-// Process various embedding or prediction requests
-func (c *Client) Vertex(instances []VertexInstance) ([]VertexResponseInstance, error) {
-	req, err := json.Marshal(VertexRequest{
-		Instances: instances,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("failed to marshal request: %w", err)
-	}
-
-	httpReq, err := http.NewRequest("POST", c.baseURL+"/vertex", bytes.NewBuffer(req))
-	if err != nil {
-		return nil, fmt.Errorf("failed to create http request: %w", err)
-	}
-
-	httpReq = c.prepareRequest(httpReq)
-	res, err := c.client.Do(httpReq)
-	if err != nil {
-		return nil, fmt.Errorf("failed to execute http request: %w", err)
-	}
-	defer res.Body.Close()
-
-	if res.StatusCode != 200 {
-		return nil, c.handleErrorResponse(res)
-	}
-
-	var response []VertexResponseInstance
-	err = json.NewDecoder(res.Body).Decode(&response)
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse response: %w", err)
+	for i, rank := range response {
+		response[i].Text = texts[rank.Index]
 	}
 
 	return response, nil
@@ -372,7 +341,7 @@ func (c *Client) Vertex(instances []VertexInstance) ([]VertexResponseInstance, e
 
 // Tokenize
 // Tokenize input text
-func (c *Client) Tokenize(inputs string, addSpecialTokens bool) ([]SimpleToken, error) {
+func (c *Client) Tokenize(inputs []string, addSpecialTokens bool) ([][]SimpleToken, error) {
 	req, err := json.Marshal(TokenizeRequest{
 		Inputs:           inputs,
 		AddSpecialTokens: addSpecialTokens,
@@ -397,7 +366,7 @@ func (c *Client) Tokenize(inputs string, addSpecialTokens bool) ([]SimpleToken, 
 		return nil, c.handleErrorResponse(res)
 	}
 
-	var response []SimpleToken
+	var response [][]SimpleToken
 	err = json.NewDecoder(res.Body).Decode(&response)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse response: %w", err)
@@ -408,7 +377,7 @@ func (c *Client) Tokenize(inputs string, addSpecialTokens bool) ([]SimpleToken, 
 
 // Decode
 // Decode input ids into text
-func (c *Client) Decode(ids []int, skipSpecialTokens bool) ([]string, error) {
+func (c *Client) Decode(ids [][]int, skipSpecialTokens bool) ([]string, error) {
 	req, err := json.Marshal(DecodeRequest{
 		Ids:               ids,
 		SkipSpecialTokens: skipSpecialTokens,
